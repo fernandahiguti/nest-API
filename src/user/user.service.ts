@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from './interfaces/user.interface';
 import { CreateUserDto } from './dto/create-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -13,7 +14,8 @@ export class UserService {
     if (existingUser) {
       throw new Error('There is already an account with this email');
     }
-    const createdUser = new this.userModel(createUserDto);
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const createdUser = new this.userModel({ ...createUserDto, password: hashedPassword });
     return createdUser.save();
   }
 
@@ -22,4 +24,3 @@ export class UserService {
   }
 
 }
-
